@@ -12,6 +12,13 @@ def build_citymap(dataset):
     cdf = MappedCDF(dataset['name'], dataset['dist'])
     return CityMap(cities, cdf)
 
+def citymap_to_dict(citymap):
+    return [{'name': city.name,
+             'position': {
+                 'x': city.position.x,
+                 'y': city.position.y,
+                 }} for city in citymap.cities]
+
 @app.route('/')
 def home():
     return app.send_static_file('index.html')
@@ -19,7 +26,8 @@ def home():
 @app.route('/api/config')
 def api_config():
     return jsonify({
-        'datasets': app.config['DATASETS'],
+        'citymaps': {dataset : citymap_to_dict(citymap)
+                     for dataset, citymap in app.config['CITYMAPS'].items()},
         'methods': list(app.config['TSP_METHODS'].keys()),
         })
 
@@ -42,8 +50,7 @@ def api_methods_post():
 
         # dataset
         dataset_name = request.form['dataset']
-        dataset = app.config['DATASETS'][dataset_name]
-        citymap = build_citymap(dataset)
+        citymap = app.config['CITYMAPS'][dataset_name]
 
         # get starting city
         starting_city_name = request.form['starting_city']
@@ -69,11 +76,13 @@ def setup_logging():
         app.logger.setLevel(logging.INFO)
 
     # parse all available datasets
-    parsed_datasets = {}
-    for dataset in DATASETS:
-        app.logger.info('parsing dataset %s' % dataset)
-        parsed_datasets[dataset] = parse_dataset(dataset)
-    app.config['DATASETS'] = parsed_datasets
+    citymaps = {}
+    for dataset_name in DATASETS:
+        app.logger.info('parsing dataset %s' % dataset_name)
+        dataset = parse_dataset(dataset_name)
+        app.logger.info('building citymap for dataset %s' % dataset_name)
+        citymaps[dataset_name] = build_citymap(dataset)
+    app.config['CITYMAPS'] = citymaps
 
     # setup tsp algorithms
     app.config['TSP_METHODS'] = {
