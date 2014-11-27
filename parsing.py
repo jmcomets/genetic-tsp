@@ -23,36 +23,20 @@ def parse_dataset(dataset_name):
                 dataset[name] = parsers[name](fp)
     return dataset
 
-def parse_main(fp):
-    return dict(line.split() for line in fp)
-
 def parse_dist(fp):
     return list(list(map(float, line.split())) for line in fp)
-
-def parse_weight(fp):
-    return list(map(float, next(fp).split()))
 
 def parse_name(fp):
     return list(fp)
 
 def parse_xy(fp):
-    pass
-
-def parse_xyz(fp):
-    pass
+    return list(list(map(float, line.split())) for line in fp)
 
 parsers = {
-        'main'   : parse_main,
         'dist'   : parse_dist,
-        'weight' : parse_weight,
         'name'   : parse_name,
-        'xyz'    : parse_xyz,
         'xy'     : parse_xy,
         }
 
 patterns = {x : ''.join(('%s_', x, '.txt'))
             for x in parsers.keys()}
-
-for dataset_name in DATASETS:
-    dataset = parse_dataset(dataset_name)
-    print(list(dataset.keys()))
