@@ -38,6 +38,9 @@ class MappedCDF(CityDistanceFinder):
         return self.distance_mapping[city][other_city]
 
 class CityMap:
-    def __init__(self, cities, city_distance_finder):
+    def __init__(self, cities, cdf):
         self.cities = cities
-        self.city_distance_finder = city_distance_finder
+        self.cdf = cdf
+
+    def distance_between(self, city, other_city):
+        return self.cdf.distance_between(city, other_city)
