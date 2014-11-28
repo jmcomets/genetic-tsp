@@ -3,23 +3,23 @@
 
   // Controller handling dataset loading as well as setting the currently
   // viewed dataset.
-  app.controller('ConfigCtrl', function($scope, APIService, $rootScope) {
+  app.controller('MainCtrl', function($scope, APIService) {
     // Load dataset on startup
-    APIService.configure().then(function(dataset) {
-      $rootScope.dataset = dataset;
+    APIService.configure().then(function(datasets) {
+      $scope.datasets = datasets;
     });
 
     // Change focused dataset
     $scope.setCurrentDataset = function(name) {
       $scope.currentDataset = name;
-      $rootScope.$broadcast('currentDatasetChanged', name);
     };
   });
 
   // Controller handling representation of the map (can be SVG, Canvas, etc...)
-  app.controller('MapCtrl', function($scope, $rootScope) {
-    $rootScope.$on('currentDatasetChanged', function(_, datasetName) {
-      $scope.cities = $rootScope.dataset.citymaps[datasetName];
+  app.controller('MapCtrl', function($scope) {
+    $scope.$watch('currentDataset', function() {
+      if (!$scope.datasets) { return; }
+      $scope.cities = $scope.datasets.citymaps[$scope.currentDataset];
       $scope.bounds = $scope.updateBounds();
     });
 
@@ -73,7 +73,6 @@
       }
     };
   });
-
 
   // Service handling HTTP requests to the API
   app.service('APIService', function($http, $q) {
