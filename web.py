@@ -4,7 +4,7 @@ from models import Position, City, CityMap, MappedCDF
 from parsing import parse_dataset, DATASETS
 import solving
 
-app = Flask(__name__, static_folder='static', static_url_path='')
+app = Flask(__name__, static_folder='public', static_url_path='')
 
 def build_citymap(dataset):
     cities = list(City(name, Position(*position)) for name, position in

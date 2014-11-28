@@ -1,6 +1,6 @@
 import os
 
-STATIC_DIR = 'static'
+STATIC_DIR = 'public'
 DATASETS_DIR = os.path.join(STATIC_DIR, 'data')
 COMMENT_CHAR = '#'
 DATASETS = os.listdir(DATASETS_DIR)
