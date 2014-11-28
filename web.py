@@ -2,7 +2,7 @@ import logging
 from flask import Flask, jsonify, abort, request
 from models import Position, City, CityMap, MappedCDF
 from parsing import parse_dataset, DATASETS
-import methods.genetic # FIXME
+import solving
 
 app = Flask(__name__, static_folder='static', static_url_path='')
 
@@ -28,26 +28,20 @@ def api_config():
     return jsonify({
         'citymaps': {dataset : citymap_to_dict(citymap)
                      for dataset, citymap in app.config['CITYMAPS'].items()},
-        'methods': list(app.config['TSP_METHODS'].keys()),
         })
 
-@app.route('/api/methods', methods=['POST'])
-def api_methods_post():
+@app.route('/api/solution', methods=['POST'])
+def api_solution_post():
     """Run a TSP solver for a given dataset.
 
     Parameters:
     - starting_city: name of the city to start from
     - dataset: name of the dataset to use (see app.config['DATASETS'])
-    - method: the TSP method to use (see app.config['TSP_METHODS'])
 
     Returns: a JSON object
     - path: a list of city names to follow
     """
     try:
-        # solving method
-        method_name = request.form['method']
-        method = app.config['TSP_METHODS'][method_name]
-
         # dataset
         dataset_name = request.form['dataset']
         citymap = app.config['CITYMAPS'][dataset_name]
@@ -60,7 +54,7 @@ def api_methods_post():
             raise KeyError
 
         # run solver
-        path = method.solve(citymap, starting_city)
+        path = solving.solve(citymap, starting_city)
         return jsonify({
             'path': [c.name for c in path],
             })
@@ -83,11 +77,6 @@ def setup_logging():
         app.logger.info('building citymap for dataset %s' % dataset_name)
         citymaps[dataset_name] = build_citymap(dataset)
     app.config['CITYMAPS'] = citymaps
-
-    # setup tsp algorithms
-    app.config['TSP_METHODS'] = {
-            'genetic': methods.genetic,
-            }
 
 if __name__ == '__main__':
     import sys
