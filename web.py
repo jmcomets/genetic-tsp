@@ -1,16 +1,10 @@
 import logging
 from flask import Flask, jsonify, abort, request
-from models import Position, City, CityMap, MappedCDF
-from parsing import parse_dataset, DATASETS
+from models import parse_and_build_dataset
+from parsing import DATASETS
 import solving
 
 app = Flask(__name__, static_folder='public', static_url_path='')
-
-def build_citymap(dataset):
-    cities = list(City(name, Position(*position)) for name, position in
-                  zip(dataset['name'], dataset['xy']))
-    cdf = MappedCDF(dataset['name'], dataset['dist'])
-    return CityMap(cities, cdf)
 
 def citymap_to_dict(citymap):
     return [{'name': city.name,
@@ -73,9 +67,7 @@ def setup_logging():
     citymaps = {}
     for dataset_name in DATASETS:
         app.logger.info('parsing dataset %s' % dataset_name)
-        dataset = parse_dataset(dataset_name)
-        app.logger.info('building citymap for dataset %s' % dataset_name)
-        citymaps[dataset_name] = build_citymap(dataset)
+        citymaps[dataset_name] = parse_and_build_dataset(dataset_name)
     app.config['CITYMAPS'] = citymaps
 
 if __name__ == '__main__':

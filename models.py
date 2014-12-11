@@ -35,7 +35,7 @@ class MappedCDF(CityDistanceFinder):
                 self.distance_mapping[c2][c1] = dist
 
     def distance_between(self, city, other_city):
-        return self.distance_mapping[city][other_city]
+        return self.distance_mapping[city.name][other_city.name]
 
 class CityMap:
     def __init__(self, cities, cdf):
@@ -44,3 +44,12 @@ class CityMap:
 
     def distance_between(self, city, other_city):
         return self.cdf.distance_between(city, other_city)
+
+def build_citymap(dataset):
+    cities = list(City(name, Position(*position)) for name, position in
+                  zip(dataset['name'], dataset['xy']))
+    cdf = MappedCDF(dataset['name'], dataset['dist'])
+    return CityMap(cities, cdf)
+
+def parse_and_build_dataset(dataset_name):
+    return build_citymap(parse_dataset(dataset_name))
