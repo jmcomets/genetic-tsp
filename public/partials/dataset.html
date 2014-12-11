@@ -1,4 +1,4 @@
 <div class="row"><h1>City map for {{ currentDataset }}</h1><div class="col-md-4"><p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod
 tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At
 vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,
-no sea takimata sanctus est Lorem ipsum dolor sit amet.</p></div><div class="col-md-8"><svg width="100%" height="600px" data-vbox="{{bounds.minX}} {{bounds.minY}} {{bounds.width}} {{bounds.height}}" preserveaspectratio="xMidYMid meet"><circle data-ng-repeat="city in cities" data-ng-attr-cx="{{city.position.x}}" data-ng-attr-cy="{{city.position.y}}" data-ng-attr-r="{{cityCircleRadius(city)}}"></circle></svg></div></div>
+no sea takimata sanctus est Lorem ipsum dolor sit amet.</p></div><div class="col-md-8"><svg width="100%" height="600px" data-vbox="{{bounds.minX}} {{bounds.minY}} {{bounds.width}} {{bounds.height}}" preserveaspectratio="xMidYMid meet"><g data-ng-repeat="city in cities" data-ng-attr-transform="translate({{city.position.x}}, {{city.position.y}})"><circle r="5" fill="black"></circle></g></svg></div></div>

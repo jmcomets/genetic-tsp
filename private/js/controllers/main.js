@@ -6,7 +6,7 @@ app.controller('MainCtrl', function($scope, $location, APIService) {
   });
 
   $scope.isActive = function(viewLocation) {
-    console.log(viewLocation, $location.path());
+    //console.log(viewLocation, $location.path());
     return viewLocation == $location.path();
   };
 });

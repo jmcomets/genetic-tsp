@@ -48,20 +48,20 @@ app.controller('DatasetCtrl', function($scope, $routeParams) {
     // Keep width/height
     bounds.width = bounds.maxX - bounds.minX;
     bounds.height = bounds.maxY - bounds.minY;
+
+    // Zoom out a bit
+    var scale = .1;
+    bounds.minX -= bounds.width * scale;
+    bounds.maxX += bounds.width * scale;
+    bounds.minY -= bounds.height * scale;
+    bounds.maxY += bounds.height * scale;
+    bounds.width = bounds.maxX - bounds.minX;
+    bounds.height = bounds.maxY - bounds.minY;
     return bounds;
   };
 
   // Set value on startup (needed for view box)
   $scope.bounds = $scope.updateBounds();
-
-  // Cities should be represented as a circle, and therefore will have a
-  // radius depending on their size and the world's area (taken as sqrt).
-  //
-  // FIXME
-  $scope.cityCircleRadius = function(city) {
-    var area = $scope.bounds.width * $scope.bounds.height / 10;
-    return Math.floor(Math.sqrt(area) / $scope.cities.length);
-  };
 });
 ;// Main controller handling dataset loading as well as other global stuff
 app.controller('MainCtrl', function($scope, $location, APIService) {
@@ -71,7 +71,7 @@ app.controller('MainCtrl', function($scope, $location, APIService) {
   });
 
   $scope.isActive = function(viewLocation) {
-    console.log(viewLocation, $location.path());
+    //console.log(viewLocation, $location.path());
     return viewLocation == $location.path();
   };
 });
