@@ -1,5 +1,5 @@
 // Controller handling representation of the map (can be SVG, Canvas, etc...)
-app.controller('DatasetCtrl', function($scope, $routeParams) {
+app.controller('DatasetCtrl', function($scope, $routeParams, APIService) {
   $scope.currentDataset = $routeParams.name;
   $scope.cities = $scope.datasets.citymaps[$scope.currentDataset];
 
@@ -42,4 +42,33 @@ app.controller('DatasetCtrl', function($scope, $routeParams) {
 
   // Set value on startup (needed for view box)
   $scope.bounds = $scope.updateBounds();
+
+  // Path for currently viewed solution
+  $scope.path = [];
+
+  // Solve for the current startingCity (does not work otherwise)
+  $scope.solve = function() {
+    $scope.path = [];
+    APIService.solve({
+      starting_city: $scope.startingCity.name,
+      dataset: $scope.currentDataset
+    }).then(function(data) {
+      angular.forEach(data.path, function(cityName) {
+        angular.forEach($scope.cities, function(city) {
+          if (city.name == cityName) {
+            var prevcity = ($scope.path[$scope.path.length-1])
+              ? $scope.path[$scope.path.length-1][1] : $scope.startingCity;
+            $scope.path.push([prevcity, city]);
+            return;
+          }
+        });
+      });
+    }, function() {
+      console.log('error');
+      $scope.path = [];
+    });
+  };
+  // shortcut
+  $scope.setStartingCity = function(city) { $scope.startingCity = city; };
+
 });

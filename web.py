@@ -35,13 +35,14 @@ def api_solution_post():
     Returns: a JSON object
     - path: a list of city names to follow
     """
+    params = request.get_json()
     try:
         # dataset
-        dataset_name = request.form['dataset']
+        dataset_name = params['dataset']
         citymap = app.config['CITYMAPS'][dataset_name]
 
         # get starting city
-        starting_city_name = request.form['starting_city']
+        starting_city_name = params['starting_city']
         starting_city = next((c for c in citymap.cities
                               if c.name == starting_city_name), None)
         if starting_city is None:

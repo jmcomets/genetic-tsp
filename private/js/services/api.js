@@ -5,7 +5,14 @@ app.service('APIService', function($http, $q) {
       var deferred = $q.defer();
       $http.get('/api/config')
         .success(function(data) { deferred.resolve(data); })
-        .error(function() { /* TODO */ })
+        .error(function() { deferred.reject(); })
+      ;
+      return deferred.promise;
+    }, solve: function(params) {
+      var deferred = $q.defer();
+      $http.post('/api/solution', params)
+        .success(function(data) { deferred.resolve(data); })
+        .error(function() { deferred.reject(); })
       ;
       return deferred.promise;
     }

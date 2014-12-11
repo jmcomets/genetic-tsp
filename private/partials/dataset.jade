@@ -2,11 +2,18 @@
   h1 City map for {{ currentDataset }}
   .col-md-4
     p
-      | Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod
-      | tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At
-      | vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,
-      | no sea takimata sanctus est Lorem ipsum dolor sit amet.
+      | You can solve the TSP problem for a given starting city by clicking on
+      | a city in the following map and clicking the "solve" button. Note that
+      | this operation may be very slow depending on the selected dataset.
   .col-md-8
-    svg(width='100%', height='600px', data-vbox='{{bounds.minX}} {{bounds.minY}} {{bounds.width}} {{bounds.height}}', preserveaspectratio='xMidYMid meet')
+    svg(width='100%', style='max-height:600px', data-vbox='{{bounds.minX}} {{bounds.minY}} {{bounds.width}} {{bounds.height}}', preserveaspectratio='xMidYMid meet', data-ng-click='setStartingCity(null)')
       g(data-ng-repeat='city in cities', data-ng-attr-transform='translate({{city.position.x}}, {{city.position.y}})')
-        circle(r='5', fill='black')
+        circle(r='5', data-ng-attr-fill='{{ { false: "black", true: "red" }[startingCity == city] }}',
+               data-ng-click='setStartingCity(city)', data-stop-click)
+      g(data-ng-repeat='pairs in path')
+        line(data-ng-attr-x1='{{pairs[0].position.x}}' data-ng-attr-y1='{{pairs[0].position.y}}'
+             data-ng-attr-x2='{{pairs[1].position.x}}' data-ng-attr-y2='{{pairs[1].position.y}}'
+             style='stroke:rgb(255,0,0);stroke-width:2')
+  .col-md-5.col-md-offset-7
+    button.btn.btn-primary.btn-block.btn-lg(type='button', data-ng-click='solve()', data-ng-disabled='!startingCity')
+      | Solve the TSP problem
