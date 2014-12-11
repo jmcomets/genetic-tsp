@@ -35,8 +35,7 @@ def selection(population, fitness_f, popsize):
         new_population.append(selected_genome)
     return new_population
 
-def reproduction(population, popsize):
-    # reproduction
+def reproduction(population, popsize, crossover_p, mutation_p):
     new_population = []
     while len(new_population) < popsize:
         # choose parents
@@ -45,17 +44,20 @@ def reproduction(population, popsize):
         second = random.choice(population)
 
         # PMX cross-over (two opposite children)
-        a, b = 0, 0
-        while not a < b:
-            a, b = (random.randint(0, len(first)-1) for _ in range(2))
-        for i in range(a, b+1):
-            j = second.index(first[i])
-            first[i], second[j] = second[j], first[i]
+        if random.random() < crossover_p:
+            a, b = 0, 0
+            while not a < b:
+                a, b = (random.randint(0, len(first)-1) for _ in range(2))
+            for i in range(a, b+1):
+                j = second.index(first[i])
+                first[i], second[j] = second[j], first[i]
 
         # mutation: swap two elements
-        for child in (first, second):
-            i, j = (random.randint(0, len(child)-1) for _ in range(2))
-            child[i], child[j] = child[j], child[i]
+        if random.random() < mutation_p:
+            for child in (first, second):
+                i, j = (random.randint(0, len(child)-1) for _ in range(2))
+                child[i], child[j] = child[j], child[i]
+
         new_population.append(first)
         new_population.append(second)
     return new_population
@@ -67,23 +69,31 @@ def genetic_method(citymap, starting_city):
 
     # helpers
     compute_distance = lambda c1, c2: citymap.distance_between(c1, c2)
+    compute_path_distance = lambda cs: sum(compute_distance(cs[i], cs[i+1])
+                                           for i in range(len(cs)-1))
 
     # parameters
-    popsize = 50
-    iterations = 500
+    popsize = 80
+    iterations = 200
     selection_proportion = .2
-    mutation_chance = .2
-    compute_fitness = lambda cs: 1/sum(compute_distance(cs[i], cs[i+1])
-                                       for i in range(len(cs)-1))
+    crossover_p = .3
+    mutation_p = .05
+    fitness_f = lambda cs: 1/compute_path_distance(cs)
 
     # run genetic algorithm
     population = initialize_population(cities, popsize)
-    for _ in range(iterations):
-        population = selection(population, compute_fitness,
+    for i in range(iterations):
+        population = selection(population, fitness_f,
                                int(popsize * selection_proportion))
-        population = reproduction(population, popsize)
+        population = reproduction(population, popsize, crossover_p, mutation_p)
+
+        # debug best genome
+        genome_fitnesses = ((g, compute_path_distance(g)) for g in population)
+        genome_fitnesses = sorted(genome_fitnesses, key=lambda gf: gf[1])
+        print(i, genome_fitnesses[0][1])
 
     # return best candidate
-    genome_fitnesses = ((g, compute_fitness(g)) for g in population)
-    genome_fitnesses = sorted(genome_fitnesses, key=lambda gf: gf[1], reverse=True)
-    return genome_fitnesses[0][0]
+    genome_fitnesses = ((g, compute_path_distance(g)) for g in population)
+    genome_fitnesses = sorted(genome_fitnesses, key=lambda gf: gf[1])
+    best_genome = genome_fitnesses[0][0]
+    return best_genome
