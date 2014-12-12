@@ -1,5 +1,5 @@
 import logging
-from flask import Flask, jsonify, abort, request
+from flask import Flask, jsonify, request
 from models import parse_and_build_dataset
 from parsing import DATASETS
 import solving
@@ -38,23 +38,35 @@ def api_solution_post():
     params = request.get_json()
     try:
         # dataset
-        dataset_name = params['dataset']
-        citymap = app.config['CITYMAPS'][dataset_name]
+        try:
+            dataset_name = params['dataset']
+        except KeyError as e:
+            raise KeyError('no dataset given') from e
+        try:
+            citymap = app.config['CITYMAPS'][dataset_name]
+        except KeyError as e:
+            raise KeyError('bad dataset given') from e
 
-        # get starting city
-        starting_city_name = params['starting_city']
+        # starting city
+        try:
+            starting_city_name = params['starting_city']
+        except KeyError as e:
+            raise KeyError('no starting city given') from e
         starting_city = next((c for c in citymap.cities
                               if c.name == starting_city_name), None)
         if starting_city is None:
-            raise KeyError
+            raise KeyError('bad starting city given')
 
         # run solver
         path = solving.solve(citymap, starting_city)
         return jsonify({
             'path': [c.name for c in path],
             })
-    except KeyError:
-        return abort(400)
+    except KeyError as e:
+        logging.error(e)
+        response = jsonify({ 'message': str(e) })
+        response.status_code = 400
+        return response
 
 @app.before_first_request
 def setup_logging():
@@ -64,7 +76,8 @@ def setup_logging():
     else:
         app.logger.setLevel(logging.INFO)
 
-    # parse all available datasets
+@app.before_first_request
+def parse_all_datasets():
     citymaps = {}
     for dataset_name in DATASETS:
         app.logger.info('parsing dataset %s' % dataset_name)
