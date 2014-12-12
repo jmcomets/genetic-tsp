@@ -9,4 +9,4 @@ def random_method(citymap, starting_city):
 
 from .genetic import genetic_method
 
-solve = genetic_method
+solve = lambda cm, c: genetic_method(cm, c)[1]

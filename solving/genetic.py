@@ -96,19 +96,15 @@ def genetic_method(citymap, starting_city):
     fitness_f = lambda cs: 1/compute_path_distance(cs)
 
     # run genetic algorithm
+    steps = []
     population = initialize_population(cities, popsize)
     for i in range(iterations):
         population = selection(population, fitness_f,
                                int(popsize * selection_proportion))
         population = reproduction(population, popsize, crossover_p, mutation_p)
 
-        # debug best genome
+        # yield best genome
         genome_distances = ((g, compute_path_distance(g)) for g in population)
         genome_distances = sorted(genome_distances, key=lambda gf: gf[1])
-        yield i, genome_distances[0][1]
-
-    # return best candidate
-    #genome_fitnesses = ((g, compute_path_distance(g)) for g in population)
-    #genome_fitnesses = sorted(genome_fitnesses, key=lambda gf: gf[1])
-    #best_genome = genome_fitnesses[0][0]
-    #return best_genome
+        steps.append((i,) + genome_distances[0])
+    return steps, steps[-1][1]
