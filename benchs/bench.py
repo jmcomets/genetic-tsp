@@ -8,4 +8,4 @@ for dataset in DATASETS:
         lines = list(solve(citymap, starting_city))
         with open('results/%s-%s.csv' % (dataset, starting_city.name), 'w') as fp:
             for i, distance in lines:
-                fp.write('%s %s\n' % (i, distance))
+                fp.write('%s,%s\n' % (i, distance))
