@@ -1,5 +1,4 @@
 import random
-from functools import reduce
 
 __all__ = ('genetic_method',)
 
@@ -35,31 +34,47 @@ def selection(population, fitness_f, popsize):
         new_population.append(selected_genome)
     return new_population
 
+def crossover(parents):
+    assert len(parents) == 2
+    assert len(parents[0]) == len(parents[1])
+    first, second = map(list, parents)
+    a, b = 0, 0
+    while not a < b:
+        a, b = (random.randint(0, len(first)-1) for _ in range(2))
+    for i in range(a, b+1):
+        j = second.index(first[i])
+        first[i], second[j] = second[j], first[i]
+    return random.choice((first, second))
+
+def mutation(child):
+    assert len(child) > 1
+    i, j = (random.randint(0, len(child)-1) for _ in range(2))
+    child[i], child[j] = child[j], child[i]
+
 def reproduction(population, popsize, crossover_p, mutation_p):
+    nb_parents = 2
+    nb_children = 2
+
     new_population = []
     while len(new_population) < popsize:
         # choose parents
         # TODO maybe two necessarily different parents ?
-        first = random.choice(population)
-        second = random.choice(population)
+        parents = [random.choice(population) for _ in range(nb_parents)]
 
-        # PMX cross-over (two opposite children)
-        if random.random() < crossover_p:
-            a, b = 0, 0
-            while not a < b:
-                a, b = (random.randint(0, len(first)-1) for _ in range(2))
-            for i in range(a, b+1):
-                j = second.index(first[i])
-                first[i], second[j] = second[j], first[i]
+        # apply genetic operators
+        for _ in range(nb_children):
+            # PMX cross-over (two opposite children)
+            if random.random() < crossover_p:
+                child = crossover(parents)
+            else:
+                child = random.choice(parents)
 
-        # mutation: swap two elements
-        if random.random() < mutation_p:
-            for child in (first, second):
-                i, j = (random.randint(0, len(child)-1) for _ in range(2))
-                child[i], child[j] = child[j], child[i]
+            # mutation: swap two elements
+            if random.random() < mutation_p:
+                mutation(child)
 
-        new_population.append(first)
-        new_population.append(second)
+            # add child to new population
+            new_population.append(child)
     return new_population
 
 def genetic_method(citymap, starting_city):
@@ -88,12 +103,12 @@ def genetic_method(citymap, starting_city):
         population = reproduction(population, popsize, crossover_p, mutation_p)
 
         # debug best genome
-        genome_fitnesses = ((g, compute_path_distance(g)) for g in population)
-        genome_fitnesses = sorted(genome_fitnesses, key=lambda gf: gf[1])
-        print(i, genome_fitnesses[0][1])
+        genome_distances = ((g, compute_path_distance(g)) for g in population)
+        genome_distances = sorted(genome_distances, key=lambda gf: gf[1])
+        yield i, genome_distances[0][1]
 
     # return best candidate
-    genome_fitnesses = ((g, compute_path_distance(g)) for g in population)
-    genome_fitnesses = sorted(genome_fitnesses, key=lambda gf: gf[1])
-    best_genome = genome_fitnesses[0][0]
-    return best_genome
+    #genome_fitnesses = ((g, compute_path_distance(g)) for g in population)
+    #genome_fitnesses = sorted(genome_fitnesses, key=lambda gf: gf[1])
+    #best_genome = genome_fitnesses[0][0]
+    #return best_genome
