@@ -9,4 +9,8 @@ app.controller('MainCtrl', function($scope, $location, APIService) {
     //console.log(viewLocation, $location.path());
     return viewLocation == $location.path();
   };
+
+  $scope.go = function(path) {
+    $location.path(path);
+  };
 });
