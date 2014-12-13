@@ -58,9 +58,12 @@ def api_solution_post():
             raise KeyError('bad starting city given')
 
         # run solver
-        path = solving.solve(citymap, starting_city)
+        steps, path = solving.solve(citymap, starting_city)
         return jsonify({
             'path': [c.name for c in path],
+            'steps': [{ 'distance': step_distance,
+                        'path': [c.name for c in step_path] }
+                      for _, step_path, step_distance in steps]
             })
     except KeyError as e:
         logging.error(e)
