@@ -1,6 +1,6 @@
 import random
 
-__all__ = ('genetic_method',)
+__all__ = ('solve',)
 
 def initialize_population(cities, popsize):
     population = [list(cities) for _ in range(popsize)]
@@ -77,15 +77,13 @@ def reproduction(population, popsize, crossover_p, mutation_p):
             new_population.append(child)
     return new_population
 
-def genetic_method(citymap, starting_city):
+def solve(citymap, starting_city):
     """Solve the TSP using a genetic algorithm."""
     cities = list(citymap.cities)
     cities.remove(starting_city)
 
     # helpers
-    compute_distance = lambda c1, c2: citymap.distance_between(c1, c2)
-    compute_path_distance = lambda cs: sum(compute_distance(cs[i], cs[i+1])
-                                           for i in range(len(cs)-1))
+    compute_path_distance = lambda cs: citymap.total_path_distance(cs)
 
     # parameters
     popsize = 80
@@ -96,15 +94,13 @@ def genetic_method(citymap, starting_city):
     fitness_f = lambda cs: 1/compute_path_distance(cs)
 
     # run genetic algorithm
-    steps = []
     population = initialize_population(cities, popsize)
-    for i in range(iterations):
+    for _ in range(iterations):
         population = selection(population, fitness_f,
                                int(popsize * selection_proportion))
         population = reproduction(population, popsize, crossover_p, mutation_p)
 
-        # yield best genome
-        genome_distances = ((g, compute_path_distance(g)) for g in population)
-        genome_distances = sorted(genome_distances, key=lambda gf: gf[1])
-        steps.append((i,) + genome_distances[0])
-    return steps, steps[-1][1]
+    # yield best genome
+    genome_distances = ((g, compute_path_distance(g)) for g in population)
+    genome_distances = sorted(genome_distances, key=lambda gf: gf[1])
+    return genome_distances[0][0]

@@ -45,6 +45,10 @@ class CityMap:
     def distance_between(self, city, other_city):
         return self.cdf.distance_between(city, other_city)
 
+    def total_path_distance(self, path):
+        return sum(self.distance_between(path[i], path[i+1])
+                   for i in range(len(path)-1))
+
 def build_citymap(dataset):
     cities = list(City(name, Position(*position)) for name, position in
                   zip(dataset['name'], dataset['xy']))

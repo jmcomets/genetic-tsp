@@ -58,13 +58,8 @@ def api_solution_post():
             raise KeyError('bad starting city given')
 
         # run solver
-        steps, path = solving.solve(citymap, starting_city)
-        return jsonify({
-            'path': [c.name for c in path],
-            'steps': [{ 'distance': step_distance,
-                        'path': [c.name for c in step_path] }
-                      for _, step_path, step_distance in steps]
-            })
+        path = solving.genetic_solve(citymap, starting_city)
+        return jsonify({'path': [c.name for c in path]})
     except KeyError as e:
         logging.error(e)
         response = jsonify({ 'message': str(e) })
