@@ -52,7 +52,7 @@ class CityMap:
 def build_citymap(dataset):
     cities = list(City(name, Position(*position)) for name, position in
                   zip(dataset['name'], dataset['xy']))
-    cdf = MappedCDF(dataset['name'], dataset['dist'])
+    cdf = EuclideanCDF()
     return CityMap(cities, cdf)
 
 def parse_and_build_dataset(dataset_name):
